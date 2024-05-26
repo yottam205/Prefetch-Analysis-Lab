@@ -21,7 +21,7 @@ These key tools will help create timelines and understand user activity.
 Software development framework created by Microsoft. It allows developers to build applications that can run on various OS. It is a necessary tool for running Eric Zimmerman’s tools.
 
 We will run the following command in the Administrative PowerShell to set up the lab environment:
-```powershell
+```
 IEX (New-Object Net.Webclient).downloadstring("https://ec-blog.s3.us-east-1.amazonaws.com/DFIR-Lab/PF_Lab/prep_lab.ps1")
 ```
 After installing, we’ll make sure that the evidence we need is located in the right place ‘c:\Cases\Prefetch’.
@@ -39,20 +39,20 @@ It is important to note that the Prefetch files we are analyzing in this lab don
 ### Create a Prefetch Timeline
 The first tool from Eric Zimmerman’s suite we’ll use is PECmd.exe. This tool analyzes individual or entire collections of Prefetch files in a very quick and thorough way.
 
-1. From the Administrative PowerShell, we’ll run the following command. This command aims PECmd at the entire directory of Prefetch files acquired from the victim’s system. It specifies the output directory of 'c:\Cases\Analysis\' and a CSV filename of ‘prefetch.csv’. By using this command we’ll get two output files:
-   a. **prefetch.csv**: Contains a verbose dump of all the data extracted from each .pf file.
-   b. **prefetch_Timeline.csv**: Contains a slimmed-down timeline of execution derived from all timestamps obtained from within each .pf file.
-   ```powershell
+1. From the Administrative PowerShell, we’ll run the following command. This command aims PECmd at the entire directory of Prefetch files acquired from the victim’s system. It specifies the output directory of `c:\Cases\Analysis\` and a CSV filename of `prefetch.csv`. By using this command we’ll get two output files:
+   - a. `prefetch.csv`: Contains a verbose dump of all the data extracted from each .pf file.
+   - b. `prefetch_Timeline.csv`: Contains a slimmed-down timeline of execution derived from all timestamps obtained from within each .pf file.
+   ```
    C:\DFIR_Tools\ZimmermanTools\net6\PECmd.exe -q -d C:\Cases\Prefetch\ --csv "C:\Cases\Analysis\" --csvf prefetch.csv
    ```
 
 2. After launching Timeline Explorer from the desktop, we’ll open the two files created after executing the last command:
-   a. **C:\Cases\Analysis\prefetch.csv**
-   b. **C:\Cases\Analysis\prefetch_Timeline.csv**
+   - a. `C:\Cases\Analysis\prefetch.csv`
+   - b. `C:\Cases\Analysis\prefetch_Timeline.csv`
 
-3. The first file we’ll start with is prefetch_Timeline.csv. In this file, we are able to see a chronologically ordered list of program executions on the system based on the parsed timestamps found within the Prefetch files. We will begin by searching for the data points we have so far from the scenario. By searching ‘burp’ in the global search bar, Timeline Explorer reveals a single execution for a program executed at ‘2024-03-12 18:36:11’ and located at:
-   ‘\Users\BILL.LUMBERGH\DOWNLOADS\BURPSUITE-PRO-CRACKED.EXE’
-   We then ‘tag’ this file, as it is a relevant and interesting one. We will also select the whole row. These two methods are important so we can return to it easily.
+3. The first file we’ll start with is prefetch_Timeline.csv. In this file, we are able to see a chronologically ordered list of program executions on the system based on the parsed timestamps found within the Prefetch files. We will begin by searching for the data points we have so far from the scenario. By searching `burp` in the global search bar, Timeline Explorer reveals a single execution for a program executed at `2024-03-12 18:36:11` and located at:
+   `\Users\BILL.LUMBERGH\DOWNLOADS\BURPSUITE-PRO-CRACKED.EXE`
+We then ‘tag’ this file, as it is a relevant and interesting one. We will also select the whole row. These two methods are important so we can return to it easily.
 
 4. At this point, we can see all the nearby executions, so we’ll begin by looking at what happened just before the ‘burpsuite-pro-cracked.exe’ file was executed. It seems like the execution just prior to our potential malware was a program called 7ZG.EXE. We will tag this file as well and get back to it later.
 5. Now, we’ll examine all the executions that occurred up to one hour AFTER our file ‘burpsuite-pro-cracked.exe’ was executed. The files I found to be interesting to examine are:
@@ -69,7 +69,7 @@ The first tool from Eric Zimmerman’s suite we’ll use is PECmd.exe. This tool
 
 I then tagged the files because we will have to further examine if they are tied to our current threat actor or not.
 
-#### Deep-Diving into Interesting Prefetch Files
+### Deep-Diving into Interesting Prefetch Files
 Using Timeline Explorer, we are able to learn which executables are worth further analysis. We’ll conduct this further analysis using PECmd, which will analyze each file individually so we can dive deeper into the information a Prefetch file about a program’s behavior within ~10 seconds of execution contains.
 
 We’ll use this CLI syntax for using PECmd.exe:
