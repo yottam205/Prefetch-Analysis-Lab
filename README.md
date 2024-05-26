@@ -45,6 +45,9 @@ The first tool from Eric Zimmerman’s suite we’ll use is PECmd.exe. This tool
    ```
    C:\DFIR_Tools\ZimmermanTools\net6\PECmd.exe -q -d C:\Cases\Prefetch\ --csv "C:\Cases\Analysis\" --csvf prefetch.csv
    ```
+![Screenshot (59)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/24201a1c-f568-4549-acfd-da337733141b)
+![Screenshot (60)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/b974b009-970e-4624-854e-3d3bd69c0dc1)
+
 
 2. After launching Timeline Explorer from the desktop, we’ll open the two files created after executing the last command:
    - a. `C:\Cases\Analysis\prefetch.csv`
@@ -52,34 +55,41 @@ The first tool from Eric Zimmerman’s suite we’ll use is PECmd.exe. This tool
 
 3. The first file we’ll start with is prefetch_Timeline.csv. In this file, we are able to see a chronologically ordered list of program executions on the system based on the parsed timestamps found within the Prefetch files. We will begin by searching for the data points we have so far from the scenario. By searching `burp` in the global search bar, Timeline Explorer reveals a single execution for a program executed at `2024-03-12 18:36:11` and located at:
    `\Users\BILL.LUMBERGH\DOWNLOADS\BURPSUITE-PRO-CRACKED.EXE`
-We then ‘tag’ this file, as it is a relevant and interesting one. We will also select the whole row. These two methods are important so we can return to it easily.
+We then **tag** this file, as it is a relevant and interesting one. We will also select the whole row. These two methods are important so we can return to it easily.
 
-4. At this point, we can see all the nearby executions, so we’ll begin by looking at what happened just before the ‘burpsuite-pro-cracked.exe’ file was executed. It seems like the execution just prior to our potential malware was a program called 7ZG.EXE. We will tag this file as well and get back to it later.
+4. At this point, we can see all the nearby executions, so we’ll begin by looking at what happened just before the `burpsuite-pro-cracked.exe` file was executed. It seems like the execution just prior to our potential malware was a program called `7ZG.EXE`. We will tag this file as well and get back to it later.
 5. Now, we’ll examine all the executions that occurred up to one hour AFTER our file ‘burpsuite-pro-cracked.exe’ was executed. The files I found to be interesting to examine are:
-   - SC.EXE: Creates persistence mechanisms with services.
-   - SCHTASKS.EXE: Creates persistence mechanisms with scheduled tasks.
-   - B.EXE, C.EXE, and P.EXE: Ran numerous times from Windows\Temp with strange names.
-   - WHOAMI.EXE: A command for learning what privileges a process is running with.
-   - POWERSHELL.EXE: A popular command-line interpreter.
-   - TASKLIST.EXE: Shows all of the different local computer processes currently running.
-   - NETSTAT.EXE: Displays the contents of various network-related data structures for active connections.
-   - RCLONE.EXE: Often associated with exfiltration.
-   - CMD.EXE: A popular command-line interpreter.
-   - SD.EXE: With a strange name.
+   - **SC.EXE**: Creates persistence mechanisms with services.
+   - **SCHTASKS.EXE**: Creates persistence mechanisms with scheduled tasks.
+   - **B.EXE**, **C.EXE**, and **P.EXE**: Ran numerous times from Windows\Temp with strange names.
+   - **WHOAMI.EXE**: A command for learning what privileges a process is running with.
+   - **POWERSHELL.EXE**: A popular command-line interpreter.
+   - **TASKLIST.EXE**: Shows all of the different local computer processes currently running.
+   - **NETSTAT.EXE**: Displays the contents of various network-related data structures for active connections.
+   - **RCLONE.EXE**: Often associated with exfiltration.
+   - **CMD.EXE**: A popular command-line interpreter.
+   - **SD.EXE**: With a strange name.
 
 I then tagged the files because we will have to further examine if they are tied to our current threat actor or not.
+
+![Screenshot (61)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/c99d947c-126e-400c-a556-677ca2f4de6a)
+![Screenshot (62)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/a18150f6-1dae-4a0e-86ed-1552889e9b92)
+![Screenshot (63)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/ad206389-85c6-4448-a37d-a0b4635db419)
+![Screenshot (64)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/7f77bd5a-ff91-4771-8d27-f5ee64eaacf3)
+![Screenshot (66)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/7f2b14c8-fb56-4bd3-a576-3360d0302fd6)
+![Screenshot (67)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/fdc09822-d593-4cda-9c8b-d0d50e85d075)
 
 ### Deep-Diving into Interesting Prefetch Files
 Using Timeline Explorer, we are able to learn which executables are worth further analysis. We’ll conduct this further analysis using PECmd, which will analyze each file individually so we can dive deeper into the information a Prefetch file about a program’s behavior within ~10 seconds of execution contains.
 
 We’ll use this CLI syntax for using PECmd.exe:
-```powershell
+```
 PECmd.exe -k <keywords> -f c:\path\to\prefetch\file.pf
 ```
-The -k parameter is optional since PECmd already looks for ‘tmp’, ‘temp’ by default, but it is recommended to use it so we can specify our analysis further.
+The -k parameter is optional since PECmd already looks for 'tmp', 'temp' by default, but it is recommended to use it so we can specify our analysis further.
 
 1. Starting with the 7ZG.EXE execution we saw just prior to burpsuite, we’ll also provide the keyword ‘burpsuite’ since we suspect they are related. The PowerShell command is as follows:
-   ```powershell
+   ```
    C:\DFIR_Tools\ZimmermanTools\net6\PECmd.exe -k burpsuite -f C:\Cases\Prefetch\7ZG.EXE-D9AA3A0B.pf
    ```
    After running the command, we are able to see all directories and files accessed by this program within ~10 seconds of execution. Many files are DLLs and data files, which are not relevant, but we can also see that there’s a hit with the keyword ‘burpsuite’ that reveals the relationship between ‘7ZG.EXE’ and an archive named ‘BURPSUITE-PRO-CRACKED.7Z’ which is in the Downloads folder. Most likely, the ‘burpsuite-pro-cracked.exe’ was originally packed inside that ‘BURSUITE-PRO-CRACKED.7Z’ file.
