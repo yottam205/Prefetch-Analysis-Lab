@@ -26,7 +26,8 @@ IEX (New-Object Net.Webclient).downloadstring("https://ec-blog.s3.us-east-1.amaz
 ```
 After installing, we’ll make sure that the evidence we need is located in the right place ‘c:\Cases\Prefetch’.
 
-[Pictures]
+![Screenshot (57)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/2efeaa30-ea8d-4a6f-b76e-ed1fb0990745)
+![Screenshot (58)](https://github.com/yottam205/Prefetch-Analysis-Lab/assets/117525375/8cbbbc8a-ef6d-41cf-a963-e9096bc4b7c0)
 
 ### Begin Analysis
 Before we begin the analysis, it is important to note that generally, we can look at the filesystem timestamps of .pf (Prefetch files) to learn two key data points:
@@ -35,10 +36,10 @@ Before we begin the analysis, it is important to note that generally, we can loo
 
 It is important to note that the Prefetch files we are analyzing in this lab don’t have original filesystem timestamps. For this specific lab, it is not critical because we are still able to carve up to 8 of the most recent execution times from within the Prefetch file itself.
 
-#### Create a Prefetch Timeline
+### Create a Prefetch Timeline
 The first tool from Eric Zimmerman’s suite we’ll use is PECmd.exe. This tool analyzes individual or entire collections of Prefetch files in a very quick and thorough way.
 
-1. From the Administrative PowerShell, we’ll run the following command. This command aims PECmd at the entire directory of Prefetch files acquired from the victim’s system. It specifies the output directory of ‘c:\Cases\Analysis\' and a CSV filename of ‘prefetch.csv’. By using this command we’ll get two output files:
+1. From the Administrative PowerShell, we’ll run the following command. This command aims PECmd at the entire directory of Prefetch files acquired from the victim’s system. It specifies the output directory of 'c:\Cases\Analysis\' and a CSV filename of ‘prefetch.csv’. By using this command we’ll get two output files:
    a. **prefetch.csv**: Contains a verbose dump of all the data extracted from each .pf file.
    b. **prefetch_Timeline.csv**: Contains a slimmed-down timeline of execution derived from all timestamps obtained from within each .pf file.
    ```powershell
